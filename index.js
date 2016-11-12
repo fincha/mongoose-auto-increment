@@ -88,13 +88,14 @@ exports.plugin = function (schema, options) {
 
   // Declare a function to get the next counter for the model/schema.
   var nextCount = function (callback) {
-    IdentityCounter.findOne({
+    return IdentityCounter.findOne({
       model: settings.model,
       field: settings.field
-    }, function (err, counter) {
-      if (err) return callback(err);
-      callback(null, counter === null ? settings.startAt : counter.count + settings.incrementBy);
-    });
+    })
+      .exec()
+      .then( function (counter) {
+        return counter === null ? settings.startAt : counter.count + settings.incrementBy;
+      });
   };
   // Add nextCount as both a method on documents and a static on the schema for convenience.
   schema.method('nextCount', nextCount);
